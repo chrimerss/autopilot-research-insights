@@ -57,8 +57,30 @@ a:hover { text-decoration: underline; }
   max-width: 70ch;
 }
 .byline strong { font-weight: 600; }
-.byline a { white-space: nowrap; }
-.byline .sep { color: var(--muted); margin: 0 8px; }
+
+.links {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  width: fit-content;
+  color: var(--accent);
+}
+.links a:hover { text-decoration: none; }
+.links a:hover span { text-decoration: underline; }
+.links svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  fill: currentColor;
+}
 
 .intro {
   color: var(--muted);
