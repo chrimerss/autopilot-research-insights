@@ -2,7 +2,7 @@
 
 A minimal, auto-updating **research-insights dashboard** for Zhi Li (Allen Li). Drop a paper
 PDF into [`interest/`](interest/), and a GitHub Action reads it with Claude, writes a 5-part
-insight grounded in your own publications, and opens a Pull Request that adds it to the site.
+insight grounded in your own publications, and commits it straight to `main` so it appears on the live site.
 
 **Live site:** https://chrimerss.github.io/autopilot-research-insights/
 &nbsp;·&nbsp; **About / methodology:** https://chrimerss.github.io/autopilot-research-insights/project.html
@@ -12,11 +12,14 @@ insight grounded in your own publications, and opens a Pull Request that adds it
 ## How it works
 
 ```
-You:    add interest/<slug>/paper.pdf  →  git push
+You:    add interest/<slug>/<paper>.pdf  →  git push
 Action: read PDF (Claude) → extract text + a figure → synthesize a 5-section insight
-        grounded in _data/publications.yml → open a run-scoped Pull Request
-You:    review the PR → merge → GitHub Pages rebuilds → the card appears under its subject tab
+        grounded in _data/publications.yml → commit it straight to main + rebuild Pages
+Result: the card appears on the live dashboard automatically (no PR, no merge step)
 ```
+
+> Insights are committed directly to `main` and go live as generated — there is no
+> pre-publish review gate. If an insight is off, edit or revert the commit after the fact.
 
 Each insight has five sections: **Summary & Key Contributions · Connections to My Work ·
 Critique & Limitations · Gaps & Ideas · How to Advance/Disrupt the Field** (with recommended
@@ -28,8 +31,8 @@ data and methods). The dashboard is organized as **subject tabs → dated accord
    the PDF can be named anything (e.g. `interest/brown-ocean-effect/brown-ocean-effect.pdf` or
    `interest/brown-ocean-effect/paper.pdf`; if several PDFs are in the folder, `paper.pdf` wins).
    You can also upload via the GitHub web UI.
-2. Push. Within a few minutes a PR titled `Insights: …` appears.
-3. Review and merge. The site updates automatically.
+2. Push. Within a few minutes the Action commits the insight to `main` and the live
+   dashboard refreshes automatically — no PR to merge.
 
 The Action also commits the extracted `interest/<slug>/paper.md` (main text) and a representative
 figure under `assets/figures/<slug>/`. Nothing is committed for a paper whose insight fails to
@@ -43,9 +46,9 @@ One-time, after the repo exists:
 # 1. Add your Anthropic API key as a repo secret (this is the only secret needed).
 gh secret set ANTHROPIC_API_KEY --repo chrimerss/autopilot-research-insights
 
-# 2. Allow GitHub Actions to open pull requests (required, or the PR step 403s).
+# 2. Give GitHub Actions write access so the workflow can commit insights to main.
 gh api -X PUT repos/chrimerss/autopilot-research-insights/actions/permissions/workflow \
-  -F default_workflow_permissions=write -F can_approve_pull_request_reviews=true
+  -F default_workflow_permissions=write
 
 # 3. Enable GitHub Pages (build from the main branch).
 gh api -X POST repos/chrimerss/autopilot-research-insights/pages \
@@ -159,7 +162,7 @@ python scripts/analyze_paper.py --local interest/<slug>/paper.pdf
 
 A representative figure may be extracted from a third-party paper and shown on its card, under
 academic **fair-use / scholarly-commentary** for non-commercial research discussion; every card
-links to the original source. Delete `assets/figures/<slug>/` in the PR to suppress one.
+links to the original source. Delete `assets/figures/<slug>/` in a follow-up commit to suppress one.
 
 ## Layout
 

@@ -67,10 +67,10 @@
         <li>Commit and push (or upload it through the GitHub web UI).</li>
         <li>A GitHub Action reads the PDF, generates the insight, and opens a <strong>Pull
           Request</strong> within a few minutes.</li>
-        <li>Review the PR. Merge it → the dashboard rebuilds and the new card appears under its
-          subject tab.</li>
+        <li>That's it — the Action commits the insight to <code>main</code> and the live
+          dashboard rebuilds automatically; the new card appears under its subject tab.</li>
       </ol>
-      <p>That's it — drop a PDF, review a PR. Nothing else to run.</p>
+      <p>That's it — drop a PDF and push. Nothing else to run; the card appears on its own.</p>
 
       <h2>One-time setup</h2>
       <p>See the <a href="https://github.com/chrimerss/autopilot-research-insights#setup">README</a>:
@@ -86,9 +86,8 @@
    ├─ extract one representative figure → assets/figures/&lt;slug&gt;/
    ├─ load research history (_data/publications.yml + published/*.md)
    ├─ Claude reads the PDF → 5-section insight JSON, grounded in your work
-   └─ write _insights/&lt;date&gt;-&lt;slug&gt;.md  → open a run-scoped PR
-        │  (you review &amp; merge)
-        ▼  GitHub Pages rebuilds → new card under its subject tab</pre>
+   └─ write _insights/&lt;date&gt;-&lt;slug&gt;.md  → commit straight to main
+        ▼  GitHub Pages rebuilds automatically → new card under its subject tab</pre>
 
       <h2>The five sections of every insight</h2>
       <ol>
@@ -107,7 +106,8 @@
           PDF input, guarded by page/size and a token budget (falls back to text).</li>
         <li><strong>Idempotent</strong>: a paper is processed once (insight-absence + content-hash guard);
           re-pushes don't duplicate.</li>
-        <li><strong>Human-in-the-loop</strong>: every change lands as a PR; nothing auto-merges.</li>
+        <li><strong>Auto-publish</strong>: the Action commits each insight directly to <code>main</code>
+          and the live site refreshes — no PR/merge step (edit or revert after the fact if needed).</li>
         <li><strong>Build-safe</strong>: all model output is YAML-escaped and Liquid-neutralized so it can
           never break the site build.</li>
       </ul>
@@ -116,7 +116,7 @@
         <strong>Figure note.</strong> A representative figure may be extracted from a third-party paper
         and shown on its card. These are displayed under academic <em>fair-use / scholarly-commentary</em>
         for non-commercial research discussion, and every card links to the original source. To suppress a
-        figure, delete <code>assets/figures/&lt;slug&gt;/</code> in the PR.
+        figure, delete <code>assets/figures/&lt;slug&gt;/</code> in a follow-up commit.
       </div>
     </section>
 
@@ -131,10 +131,12 @@
 <!-- PROGRESS_ROWS -->
           <tr><td>2026-05-31</td><td>Scaffold</td><td>Site</td><td>Jekyll site (minimal-light styling), subject tabs + accordion cards, light/dark, responsive. Local build gates green (zero-insight, dry-run insight, new-subject append-last).</td></tr>
           <tr><td>2026-05-31</td><td>Analyzer</td><td>Pipeline</td><td><code>scripts/analyze_paper.py</code>: PDF→text+figure, Claude 5-section insight, AC-9 grounding hard-check, idempotency guard. 20 unit tests passing.</td></tr>
-          <tr><td>2026-05-31</td><td>Automation</td><td>CI</td><td>Push-triggered GitHub Action (SHA-pinned actions, queue-not-cancel) opens a run-scoped PR. actionlint clean.</td></tr>
+          <tr><td>2026-05-31</td><td>Automation</td><td>CI</td><td>Push-triggered GitHub Action (SHA-pinned actions, queue-not-cancel) commits insights directly to main + triggers Pages rebuild. actionlint clean.</td></tr>
           <tr><td>2026-05-31</td><td>History</td><td>Data</td><td>Seeded <code>_data/publications.yml</code> with 20 real Google Scholar publications.</td></tr>
           <tr><td>2026-05-31</td><td>Review</td><td>QA</td><td>Code review + security review applied: GHA-output hardening, project.html HTML-escaping, source links, pinned deps, figure size cap.</td></tr>
           <tr><td>2026-05-31</td><td>Deploy</td><td>Live</td><td>Repo created &amp; pushed; GitHub Pages built (HTTP 200); Actions PR-creation enabled. Awaiting <code>ANTHROPIC_API_KEY</code> to process the first paper.</td></tr>
+          <tr><td>2026-06-01</td><td>Bedrock</td><td>Auth</td><td>Wired AWS Bedrock via GitHub OIDC (scoped IAM role, no stored keys); first paper (SWMManywhere) processed end-to-end on Opus 4.8 via an application inference-profile ARN.</td></tr>
+          <tr><td>2026-06-01</td><td>Flow</td><td>CI</td><td>Simplified: insights now commit directly to main and trigger a Pages rebuild (no PR/merge step).</td></tr>
         </tbody>
       </table>
     </section>
