@@ -1,0 +1,65 @@
+{%- comment -%}
+  Subject tabs → per-subject accordion of dated insight cards.
+  Tab order = _data/subjects.yml order (seeded first; the analyzer appends any
+  genuinely-new subject LAST, so order is deterministic and identical pre/post-merge).
+  A defensive fallback also renders tabs for any subject_slug that appears in an
+  insight but is missing from subjects.yml — appended last, alphabetically.
+{%- endcomment -%}
+
+{%- assign seeded_slugs = site.data.subjects | map: "slug" -%}
+{%- assign present_slugs = site.insights | map: "subject_slug" | uniq -%}
+{%- comment -%} Build the leftover (present-but-not-seeded) slug list via string-concat (stock Liquid has no push). {%- endcomment -%}
+{%- assign leftover_str = "" -%}
+{%- for slug in present_slugs -%}
+  {%- unless seeded_slugs contains slug -%}
+    {%- assign leftover_str = leftover_str | append: slug | append: "|" -%}
+  {%- endunless -%}
+{%- endfor -%}
+{%- assign leftover_slugs = leftover_str | split: "|" | uniq | sort -%}
+
+<div class="tabs" role="tablist" aria-label="Research subjects">
+  {%- for subject in site.data.subjects -%}
+  <button class="tab-button{% if forloop.first %} active{% endif %}"
+          role="tab"
+          id="tab-{{ subject.slug }}"
+          data-tab="{{ subject.slug }}"
+          aria-controls="panel-{{ subject.slug }}"
+          aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+    {{ subject.name }}
+  </button>
+  {%- endfor -%}
+  {%- for slug in leftover_slugs -%}
+    {%- assign sample = site.insights | where: "subject_slug", slug | first -%}
+  <button class="tab-button" role="tab"
+          id="tab-{{ slug }}" data-tab="{{ slug }}"
+          aria-controls="panel-{{ slug }}" aria-selected="false">
+    {{ sample.subject | default: slug }}
+  </button>
+  {%- endfor -%}
+</div>
+
+{%- for subject in site.data.subjects -%}
+  {%- assign cards = site.insights | where: "subject_slug", subject.slug | sort: "date" | reverse -%}
+<section class="tab-panel{% if forloop.first %} active{% endif %}"
+         id="panel-{{ subject.slug }}"
+         role="tabpanel"
+         aria-labelledby="tab-{{ subject.slug }}"
+         {% unless forloop.first %}hidden{% endunless %}>
+  {%- if cards.size > 0 -%}
+    {%- for insight in cards -%}
+      {%- include insight-card.html insight=insight -%}
+    {%- endfor -%}
+  {%- else -%}
+  <p class="empty">No insights yet.</p>
+  {%- endif -%}
+</section>
+{%- endfor -%}
+
+{%- for slug in leftover_slugs -%}
+  {%- assign cards = site.insights | where: "subject_slug", slug | sort: "date" | reverse -%}
+<section class="tab-panel" id="panel-{{ slug }}" role="tabpanel" aria-labelledby="tab-{{ slug }}" hidden>
+  {%- for insight in cards -%}
+    {%- include insight-card.html insight=insight -%}
+  {%- endfor -%}
+</section>
+{%- endfor -%}

@@ -1,0 +1,19 @@
+# Seeded subject taxonomy (tabs). The analyzer assigns each paper the best-fit
+# slug from this list; it may propose a NEW subject only when none fits, and new
+# subjects are appended LAST (deterministically) in the dashboard.
+# Tab order on the dashboard = order in this list.
+- name: "Hydrology & Hydrologic Modeling"
+  slug: "hydrology"
+  description: "Rainfall-runoff, hydrologic models, calibration, water resources, and AI agents for hydrology."
+- name: "Remote Sensing & Precipitation"
+  slug: "remote-sensing"
+  description: "Satellite precipitation (IMERG/GPM/TRMM), reanalysis, radar, and sensor evaluation."
+- name: "Machine Learning / AI Agents"
+  slug: "ml-ai"
+  description: "LLMs, foundation models, benchmarks, and agentic systems for the geosciences."
+- name: "Climate & Extremes"
+  slug: "climate-extremes"
+  description: "Climate trends, extreme events, and their environmental and societal impacts."
+- name: "Floods & Inundation"
+  slug: "floods"
+  description: "Flood inundation modeling, flash floods, flood risk, and environmental justice."

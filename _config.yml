@@ -1,0 +1,44 @@
+title: "Research Insights — Zhi Li"
+description: >-
+  Auto-generated research insights connecting interesting papers to the work of
+  Zhi Li (Allen Li): hydrology, remote sensing, machine learning, climate, and floods.
+author: "Zhi Li (Allen Li)"
+
+# Project page (repo is not chrimerss.github.io) — locked decision D3.
+# Every asset/link/figure path is emitted through `relative_url` so it resolves
+# under this sub-path.
+url: "https://chrimerss.github.io"
+baseurl: "/autopilot-research-insights"
+
+# Each insight is data rendered as a card on the single dashboard page,
+# NOT its own standalone Jekyll page.
+collections:
+  insights:
+    output: false
+
+# Only GitHub-Pages-whitelisted plugins.
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+markdown: kramdown
+kramdown:
+  input: GFM
+sass:
+  style: compressed
+
+# Keep source/tooling out of the built site. NOTE:
+#   - `project.html` is deliberately NOT excluded — it must be served live.
+#   - `assets/` is NOT excluded — figures and CSS/JS must be served.
+#   - `.omc/` is git-ignored, so it never reaches the build at all.
+exclude:
+  - scripts/
+  - interest/
+  - published/
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
+  - .ruby-version
+  - .venv/
+  - .github/

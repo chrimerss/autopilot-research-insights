@@ -1,0 +1,11 @@
+{
+  "subject": "Floods & Inundation",
+  "subject_slug": "floods",
+  "subject_is_new": false,
+  "topic": "Global crop loss from compound flood events",
+  "summary_contributions": "The paper quantifies crop yield loss from compound coastal-fluvial flooding using a coupled hydrodynamic-agronomic model, finding that compound events drive disproportionate losses relative to their frequency. Its key contribution is a globally consistent attribution of yield loss to flood mechanism.",
+  "connections_to_my_work": "This connects directly to my paper \"Severe floods significantly reduce global rice yields\", which established the flood-to-yield link at the global scale; the compound-event framing here extends that attribution. It also complements \"Societal and environmental interconnections: future directions for flood inundation models\" by stress-testing inundation outputs against an agronomic endpoint.",
+  "critique_limitations": "The agronomic response curves are calibrated on a narrow set of regions, so transfer to monsoon Asia is uncertain. The model also treats drainage recovery as instantaneous, likely underestimating waterlogging duration.",
+  "gaps_ideas": "A natural gap is the absence of a flashiness dimension — peak rate-of-rise, not just depth, governs crop damage. Pairing this with sub-daily inundation dynamics would sharpen the loss estimates.",
+  "advance_disrupt": "To advance the field: assimilate Sentinel-1 flood extent and SMAP soil moisture into a daily inundation-stress model, and replace static damage curves with a learned response trained on county-level yield panels. A disruptive step would be a foundation model mapping (rainfall, terrain, drainage) directly to yield loss, bypassing intermediate hydrodynamic simulation."
+}

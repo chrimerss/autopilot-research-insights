@@ -1,0 +1,6 @@
+# Pinned to audited-clean versions (matches the SHA-pinned actions' rigor).
+# Bump deliberately; CI re-resolves on every run.
+anthropic==0.105.2
+pymupdf==1.27.2.3
+python-slugify==8.0.4
+PyYAML==6.0.3

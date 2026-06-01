@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<!--
+  project.html — the build/methodology tracker for autopilot-research-insights.
+  NO Jekyll front matter on purpose: Jekyll copies this file verbatim, so it is
+  served live at /autopilot-research-insights/project.html. The analyzer appends a
+  row per generated insight into the PROGRESS table (see the rows marker below).
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Project — Research Insights</title>
+  <style>
+    :root{--bg:#fff;--surface:#fafafa;--text:#232629;--muted:#6a7178;--border:#e6e8eb;--accent:#2a6db0;--accent-weak:#eaf2fb;--maxw:880px}
+    @media (prefers-color-scheme:dark){:root{--bg:#14171a;--surface:#1b1f23;--text:#e6e8ea;--muted:#9aa1a8;--border:#2b3138;--accent:#6fb1ff;--accent-weak:#1d2b3a}}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+    a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+    header{border-bottom:1px solid var(--border);padding:34px 0 22px;margin-bottom:18px}
+    h1{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:1.8rem;margin:0 0 4px}
+    .sub{color:var(--muted);margin:0}
+    .tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:22px;flex-wrap:wrap}
+    .tab-btn{appearance:none;border:none;background:none;font:inherit;font-size:.95rem;color:var(--muted);padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+    .tab-btn:hover{color:var(--text)}
+    .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+    .panel{display:none}.panel.active{display:block}
+    h2{font-size:1.15rem;margin:26px 0 10px}
+    h3{font-size:1rem;margin:20px 0 6px}
+    code{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:.88em}
+    pre{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;overflow:auto;font-size:.86rem}
+    table{border-collapse:collapse;width:100%;margin:14px 0;font-size:.92rem}
+    th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+    th{background:var(--surface)}
+    .note{background:var(--accent-weak);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:16px 0;font-size:.92rem}
+    ol li,ul li{margin:5px 0}
+    footer{border-top:1px solid var(--border);margin-top:46px;padding:20px 0 40px;color:var(--muted);font-size:.85rem}
+  </style>
+</head>
+<body>
+  <header><div class="wrap">
+    <h1>Research Insights — Project</h1>
+    <p class="sub">How this dashboard works, why it's built this way, and what's been done.
+      &nbsp;·&nbsp; <a href="./">← Back to the dashboard</a></p>
+  </div></header>
+
+  <div class="wrap">
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="instruction">INSTRUCTION</button>
+      <button class="tab-btn" data-tab="methodology">METHODOLOGY</button>
+      <button class="tab-btn" data-tab="progress">PROGRESS</button>
+    </div>
+
+    <!-- INSTRUCTION ------------------------------------------------------- -->
+    <section class="panel active" id="panel-instruction">
+      <h2>What this is</h2>
+      <p>A living, auto-generated map of papers Zhi Li (Allen Li) finds interesting. Each paper
+        becomes a card with a 5-part insight that connects it back to the author's own research,
+        critiques it, and proposes concrete ways to advance or disrupt the field.</p>
+
+      <h2>How to add a paper</h2>
+      <ol>
+        <li>Put the paper's PDF at <code>interest/&lt;slug&gt;/paper.pdf</code> (the
+          <code>&lt;slug&gt;</code> folder name becomes the card's id — e.g.
+          <code>interest/brown-ocean-effect/paper.pdf</code>).</li>
+        <li>Commit and push (or upload it through the GitHub web UI).</li>
+        <li>A GitHub Action reads the PDF, generates the insight, and opens a <strong>Pull
+          Request</strong> within a few minutes.</li>
+        <li>Review the PR. Merge it → the dashboard rebuilds and the new card appears under its
+          subject tab.</li>
+      </ol>
+      <p>That's it — drop a PDF, review a PR. Nothing else to run.</p>
+
+      <h2>One-time setup</h2>
+      <p>See the <a href="https://github.com/chrimerss/autopilot-research-insights#setup">README</a>:
+        add the <code>ANTHROPIC_API_KEY</code> secret, allow Actions to open PRs, and enable Pages.</p>
+    </section>
+
+    <!-- METHODOLOGY ------------------------------------------------------- -->
+    <section class="panel" id="panel-methodology">
+      <h2>Pipeline</h2>
+      <pre>push interest/&lt;slug&gt;/paper.pdf
+   │  GitHub Action (on push to interest/**)
+   ├─ extract main text + metadata (pymupdf) → interest/&lt;slug&gt;/paper.md
+   ├─ extract one representative figure → assets/figures/&lt;slug&gt;/
+   ├─ load research history (_data/publications.yml + published/*.md)
+   ├─ Claude reads the PDF → 5-section insight JSON, grounded in your work
+   └─ write _insights/&lt;date&gt;-&lt;slug&gt;.md  → open a run-scoped PR
+        │  (you review &amp; merge)
+        ▼  GitHub Pages rebuilds → new card under its subject tab</pre>
+
+      <h2>The five sections of every insight</h2>
+      <ol>
+        <li><strong>Summary &amp; Key Contributions</strong></li>
+        <li><strong>Connections to My Work</strong> — must name at least one real publication
+          from <code>_data/publications.yml</code> (hard-checked; an ungrounded insight is rejected).</li>
+        <li><strong>Critique &amp; Limitations</strong></li>
+        <li><strong>Gaps &amp; Ideas</strong></li>
+        <li><strong>How to Advance / Disrupt the Field</strong> — concrete recommended data + methods.</li>
+      </ol>
+
+      <h2>Key design decisions</h2>
+      <ul>
+        <li><strong>Static &amp; Pages-native</strong>: Jekyll + only whitelisted plugins; no server, no DB.</li>
+        <li><strong>Hybrid PDF reading</strong>: local text/figure extraction <em>and</em> native Claude
+          PDF input, guarded by page/size and a token budget (falls back to text).</li>
+        <li><strong>Idempotent</strong>: a paper is processed once (insight-absence + content-hash guard);
+          re-pushes don't duplicate.</li>
+        <li><strong>Human-in-the-loop</strong>: every change lands as a PR; nothing auto-merges.</li>
+        <li><strong>Build-safe</strong>: all model output is YAML-escaped and Liquid-neutralized so it can
+          never break the site build.</li>
+      </ul>
+
+      <div class="note">
+        <strong>Figure note.</strong> A representative figure may be extracted from a third-party paper
+        and shown on its card. These are displayed under academic <em>fair-use / scholarly-commentary</em>
+        for non-commercial research discussion, and every card links to the original source. To suppress a
+        figure, delete <code>assets/figures/&lt;slug&gt;/</code> in the PR.
+      </div>
+    </section>
+
+    <!-- PROGRESS ---------------------------------------------------------- -->
+    <section class="panel" id="panel-progress">
+      <h2>Build &amp; run log</h2>
+      <p>Build milestones, then one row per generated insight (appended automatically by the analyzer).</p>
+      <table>
+        <thead><tr><th>Date</th><th>Item</th><th>Area</th><th>Detail</th></tr></thead>
+        <tbody>
+          <!-- PROGRESS_ROWS -->
+          <tr><td>2026-05-31</td><td>Scaffold</td><td>Site</td><td>Jekyll site (minimal-light styling), subject tabs + accordion cards, light/dark, responsive. Local build gates green (zero-insight, dry-run insight, new-subject append-last).</td></tr>
+          <tr><td>2026-05-31</td><td>Analyzer</td><td>Pipeline</td><td><code>scripts/analyze_paper.py</code>: PDF→text+figure, Claude 5-section insight, AC-9 grounding hard-check, idempotency guard. 20 unit tests passing.</td></tr>
+          <tr><td>2026-05-31</td><td>Automation</td><td>CI</td><td>Push-triggered GitHub Action (SHA-pinned actions, queue-not-cancel) opens a run-scoped PR. actionlint clean.</td></tr>
+          <tr><td>2026-05-31</td><td>History</td><td>Data</td><td>Seeded <code>_data/publications.yml</code> with 20 real Google Scholar publications.</td></tr>
+          <tr><td>2026-05-31</td><td>Review</td><td>QA</td><td>Code review + security review applied: GHA-output hardening, project.html HTML-escaping, source links, pinned deps, figure size cap.</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <footer><div class="wrap">
+    <a href="https://github.com/chrimerss/autopilot-research-insights">Source on GitHub</a>
+  </div></footer>
+
+  <script>
+    (function(){
+      var btns=[].slice.call(document.querySelectorAll(".tab-btn"));
+      var panels=[].slice.call(document.querySelectorAll(".panel"));
+      btns.forEach(function(b){b.addEventListener("click",function(){
+        btns.forEach(function(x){x.classList.toggle("active",x===b)});
+        panels.forEach(function(p){p.classList.toggle("active",p.id==="panel-"+b.dataset.tab)});
+      });});
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .site-header { padding: 26px 0 20px; }
+  .site-title { font-size: 1.55rem; }
+
+  // Let the tab strip scroll horizontally instead of wrapping into a tall block.
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .tab-button { padding: 9px 11px; }
+
+  .insight-summary { padding: 12px 14px; }
+  .insight-body { padding: 4px 14px 16px; }
+}
+
+@media print {
+  .tabs { display: none; }
+  .tab-panel { display: block !important; }
+  .insight-card[open] .insight-body, .insight-body { display: block; }
+}

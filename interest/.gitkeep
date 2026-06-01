@@ -1,0 +1,8 @@
+# Drop a paper PDF here to generate an insight.
+#
+# Layout:  interest/<slug>/paper.pdf   (you add this; push it)
+# The GitHub Action then adds, in a PR:
+#   interest/<slug>/paper.md     (extracted main text)
+#   interest/<slug>/.sha256      (change-detection guard)
+#   assets/figures/<slug>/...    (a representative figure, when extractable)
+#   _insights/<date>-<slug>.md   (the generated insight that renders as a card)

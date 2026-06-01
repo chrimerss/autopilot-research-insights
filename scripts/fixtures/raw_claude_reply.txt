@@ -1,0 +1,18 @@
+Sure — here is the structured research insight you asked for. I focused the
+"Connections" section on your flood-yield and inundation work.
+
+```json
+{
+  "subject": "Floods & Inundation",
+  "subject_slug": "floods",
+  "subject_is_new": false,
+  "topic": "Compound flooding and crop loss",
+  "summary_contributions": "Quantifies yield loss from compound flood events.",
+  "connections_to_my_work": "Extends \"Severe floods significantly reduce global rice yields\".",
+  "critique_limitations": "Narrow calibration regions.",
+  "gaps_ideas": "Missing a flashiness dimension.",
+  "advance_disrupt": "Assimilate Sentinel-1 + SMAP; learn damage curves from yield panels."
+}
+```
+
+Let me know if you'd like me to expand any section.

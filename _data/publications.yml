@@ -1,0 +1,105 @@
+# Research history for Zhi Li (Allen Li) — seeded from Google Scholar (2026-05-31).
+# Used to (a) display "Selected Publications" and (b) GROUND the insight
+# "Connections to My Work" section: an insight is rejected (REAL-pub mode) unless
+# it names at least one of these titles. Add full-text under published/<slug>.md
+# for deeper synthesis.
+- title: "HydroAgent: Closing the Gap Between Frontier LLMs and Human Experts in Hydrologic Model Calibration via Simulator-Grounded RL"
+  authors: "Z Li, S Yan, J Cao, M Zhang, A Wei, J Yoo, Y Hong"
+  venue: "arXiv preprint"
+  year: 2026
+  subject_slug: "ml-ai"
+- title: "FloodSimBench: A Benchmark Dataset for Training Foundational Flood Inundation Models"
+  authors: "Z Li, S Yan, M Zhang, S Zhu, Y Wen, A Sun, M Ma, Y Hong"
+  venue: "Preprint"
+  year: 2026
+  subject_slug: "floods"
+- title: "A Review of the Past Half Century of Geostationary Satellite Thermal Observations for Global Precipitation Estimation"
+  authors: "S Zhu, G Tang, S Sorooshian, GJ Huffman, Q Duan, S Yan, A Behrangi, et al."
+  venue: "IEEE Geoscience and Remote Sensing Magazine"
+  year: 2026
+  subject_slug: "remote-sensing"
+- title: "AI Agent for Hydrologic Modeling: Definition, Development and Application"
+  authors: "S Yan, M Chen, Z Li, Y Wen, S Zhu, M Zhang, D Liu, J Cao, X Chen, et al."
+  venue: "Authorea Preprints"
+  year: 2026
+  subject_slug: "ml-ai"
+- title: "Societal and environmental interconnections: future directions for flood inundation models"
+  authors: "Z Li, SM Gorelick"
+  venue: "Environmental Research Letters 20(12)"
+  year: 2025
+  subject_slug: "floods"
+- title: "Severe floods significantly reduce global rice yields"
+  authors: "Z Li, L Rosa, S Gorelick"
+  venue: "Science Advances 11(46)"
+  year: 2025
+  subject_slug: "floods"
+- title: "Evaluation of near-surface specific humidity and air temperature from Atmospheric Infrared Sounder (AIRS) over oceans"
+  authors: "W Qian, Y Wen, S Gao, Z Li, J Kisembe, H Jing"
+  venue: "Earth and Space Science 12(4)"
+  year: 2025
+  subject_slug: "remote-sensing"
+- title: "AQUAH: automatic quantification and unified agent in hydrology"
+  authors: "S Yan, Z Li, S Zhu, Y Wen, M Zhang, M Chen, J Cao, Y Hong"
+  venue: "Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)"
+  year: 2025
+  subject_slug: "ml-ai"
+- title: "Evaluation of IMERG climate trends over land in the TRMM and GPM eras"
+  authors: "S Zhu, Z Li, M Chen, Y Wen, Z Liu, GJ Huffman, TE Tsoodle, SC Ferraro, et al."
+  venue: "Environmental Research Letters 20(1)"
+  year: 2025
+  subject_slug: "remote-sensing"
+- title: "How has the latest IMERG V07 improved the precipitation estimates and hydrologic utility over CONUS against IMERG V06?"
+  authors: "S Zhu, Z Li, M Chen, Y Wen, S Gao, J Zhang, J Wang, Y Nan, SC Ferraro, et al."
+  venue: "Journal of Hydrology 645"
+  year: 2024
+  subject_slug: "remote-sensing"
+- title: "Assessing the impacts of falling ice radiative effects on the seasonal variation of land surface properties"
+  authors: "J Kisembe, JLF Li, Y Wen, WL Lee, W Qian, Z Li, JH Jiang"
+  venue: "Journal of Geophysical Research: Atmospheres 129(15)"
+  year: 2024
+  subject_slug: "climate-extremes"
+- title: "Hydro-modeling the ecosystem impact of wastewater reuse under climate change"
+  authors: "S Gao, Z Li, G Graves, HA Mattes, S Fathollahifard, J Vogel, TM Neeson, et al."
+  venue: "JAWRA Journal of the American Water Resources Association 60(4)"
+  year: 2024
+  subject_slug: "hydrology"
+- title: "Changes in Convective Precipitation Reflectivity over the CONUS Revealed by High-Resolution Radar Observations from 2015 to 2021"
+  authors: "H Jing, Z Li, Y Wen, S Gao, Y Wang, W Qian, J Kisembe"
+  venue: "Atmosphere 15(6)"
+  year: 2024
+  subject_slug: "climate-extremes"
+- title: "Future heavy rainfall and flood risks for Native Americans under climate and demographic changes"
+  authors: "Z Li, T Tsoodle, M Chen, S Gao, J Zhang, Y Wen, T Yang, F King, Y Hong"
+  venue: "Weather, Climate, and Society 16(1)"
+  year: 2024
+  subject_slug: "floods"
+- title: "Investigating the Brown Ocean Effect on the Re-intensification of Hurricane Florence"
+  authors: "Z Li, D Niyogi, J Garrison, FD Marks"
+  venue: "104th Annual AMS Meeting 2024"
+  year: 2024
+  subject_slug: "climate-extremes"
+- title: "Introducing Flashiness-Intensity-Duration-Frequency (F-IDF): A new metric to quantify flash flood intensity"
+  authors: "Z Li, S Gao, M Chen, J Zhang, JJ Gourley, Y Wen, T Yang, Y Hong"
+  venue: "Geophysical Research Letters 50(23)"
+  year: 2023
+  subject_slug: "floods"
+- title: "Comparison of GPM IMERG version 06 final run products and its latest version 07 precipitation products across scales"
+  authors: "Y Wang, Z Li, L Gao, Y Zhong, X Peng"
+  venue: "Remote Sensing 15(23)"
+  year: 2023
+  subject_slug: "remote-sensing"
+- title: "Interweaving Hydrology and Indigenous Knowledge for Flood-related Environmental Justice with the Otoe-Missouria Tribe"
+  authors: "Z Li, T Tsoodle, M Chen, S Gao, J Zhang, F King, Y Wen, Y Hong"
+  venue: "AGU Fall Meeting Abstracts 2023(817)"
+  year: 2023
+  subject_slug: "floods"
+- title: "Examining impacts of climate extremes on thermoelectric power production and river thermal pollution in the Midwest and Northeast of the United States"
+  authors: "J Zhang, M Chen, S Gao, Z Li, CJ Vorosmarty, BM Fekete, A Miara, et al."
+  venue: "AGU Fall Meeting Abstracts 2023(1292)"
+  year: 2023
+  subject_slug: "climate-extremes"
+- title: "An evaluation of CRA40 and ERA5 precipitation products over China"
+  authors: "Z Zhou, S Chen, Z Li, Y Luo"
+  venue: "Remote Sensing 15(22)"
+  year: 2023
+  subject_slug: "remote-sensing"

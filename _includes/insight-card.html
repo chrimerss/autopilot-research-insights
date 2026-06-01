@@ -1,0 +1,34 @@
+{%- comment -%}
+  One insight = one <details> accordion card.
+  Summary: [date] — topic. Body: paper meta + source link, optional figure,
+  and the five insight sections (rendered from markdown → HTML via markdownify).
+  The .md body is already Liquid-neutralized at write time by analyze_paper.py,
+  so LLM prose can never execute a tag.
+{%- endcomment -%}
+<details class="insight-card">
+  <summary class="insight-summary">
+    <span class="insight-date">[{{ include.insight.date | date: "%Y-%m-%d" }}]</span>
+    <span class="insight-topic">{{ include.insight.topic | escape }}</span>
+  </summary>
+  <div class="insight-body">
+    <p class="paper-meta">
+      <strong class="paper-title">{{ include.insight.title | escape }}</strong><br>
+      <span class="paper-authors">{{ include.insight.authors | escape }}</span>
+      {%- if include.insight.venue %} · <em class="paper-venue">{{ include.insight.venue | escape }}</em>{% endif -%}
+      {%- if include.insight.year %} ({{ include.insight.year }}){% endif -%}
+      {%- if include.insight.link or include.insight.source_pdf %}<br>{% endif -%}
+      {%- if include.insight.link %}<a class="paper-link" href="{{ include.insight.link }}" target="_blank" rel="noopener">Source ↗</a>&nbsp;&nbsp;{% endif -%}
+      {%- if include.insight.source_pdf %}<a class="paper-link" href="{{ include.insight.source_pdf }}" target="_blank" rel="noopener">PDF ↗</a>{% endif -%}
+    </p>
+    {%- if include.insight.figure %}
+    <figure class="insight-figure">
+      <img src="{{ include.insight.figure | relative_url }}"
+           alt="Representative figure from {{ include.insight.title | escape }}"
+           loading="lazy">
+    </figure>
+    {%- endif %}
+    <div class="insight-sections">
+      {{ include.insight.content | markdownify }}
+    </div>
+  </div>
+</details>

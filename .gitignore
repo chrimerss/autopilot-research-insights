@@ -1,0 +1,27 @@
+# Jekyll build output
+_site/
+.jekyll-cache/
+.jekyll-metadata
+.sass-cache/
+
+# Ruby / Bundler
+.bundle/
+vendor/
+vendor/bundle/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# OMC scaffolding — NEVER commit (locked decision D1: keeps the interview
+# transcript, specs, plans, and internal state off the public repo)
+.omc/
+
+# Local Claude Code / editor state
+.claude/
+
+# macOS
+.DS_Store
