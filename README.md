@@ -24,8 +24,10 @@ data and methods). The dashboard is organized as **subject tabs → dated accord
 
 ## Adding a paper
 
-1. Create `interest/<slug>/paper.pdf` (the `<slug>` folder name becomes the card id, e.g.
-   `interest/brown-ocean-effect/paper.pdf`). You can also upload via the GitHub web UI.
+1. Put the paper's PDF in a folder under `interest/` — the folder name becomes the card id, and
+   the PDF can be named anything (e.g. `interest/brown-ocean-effect/brown-ocean-effect.pdf` or
+   `interest/brown-ocean-effect/paper.pdf`; if several PDFs are in the folder, `paper.pdf` wins).
+   You can also upload via the GitHub web UI.
 2. Push. Within a few minutes a PR titled `Insights: …` appears.
 3. Review and merge. The site updates automatically.
 

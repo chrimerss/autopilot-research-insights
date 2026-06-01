@@ -61,9 +61,9 @@
 
       <h2>How to add a paper</h2>
       <ol>
-        <li>Put the paper's PDF at <code>interest/&lt;slug&gt;/paper.pdf</code> (the
-          <code>&lt;slug&gt;</code> folder name becomes the card's id — e.g.
-          <code>interest/brown-ocean-effect/paper.pdf</code>).</li>
+        <li>Put the paper's PDF in a folder under <code>interest/</code> — the folder name becomes
+          the card's id, and the PDF can be named anything (e.g.
+          <code>interest/brown-ocean-effect/brown-ocean-effect.pdf</code>).</li>
         <li>Commit and push (or upload it through the GitHub web UI).</li>
         <li>A GitHub Action reads the PDF, generates the insight, and opens a <strong>Pull
           Request</strong> within a few minutes.</li>
@@ -127,7 +127,8 @@
       <table>
         <thead><tr><th>Date</th><th>Item</th><th>Area</th><th>Detail</th></tr></thead>
         <tbody>
-          <!-- PROGRESS_ROWS -->
+          <tr><td>2026-06-01</td><td>testpaper</td><td>Floods &amp; Inundation</td><td>Global crop loss from compound flood events<br><img src="/assets/figures/testpaper/figure.png" alt="" style="max-width:160px"></td></tr>
+<!-- PROGRESS_ROWS -->
           <tr><td>2026-05-31</td><td>Scaffold</td><td>Site</td><td>Jekyll site (minimal-light styling), subject tabs + accordion cards, light/dark, responsive. Local build gates green (zero-insight, dry-run insight, new-subject append-last).</td></tr>
           <tr><td>2026-05-31</td><td>Analyzer</td><td>Pipeline</td><td><code>scripts/analyze_paper.py</code>: PDF→text+figure, Claude 5-section insight, AC-9 grounding hard-check, idempotency guard. 20 unit tests passing.</td></tr>
           <tr><td>2026-05-31</td><td>Automation</td><td>CI</td><td>Push-triggered GitHub Action (SHA-pinned actions, queue-not-cancel) opens a run-scoped PR. actionlint clean.</td></tr>

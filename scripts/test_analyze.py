@@ -147,6 +147,38 @@ class TestSelectTargetsAndSentinel(unittest.TestCase):
             self.assertEqual([p.parent.name for p in A.select_targets(None)], ["demo"])
 
 
+class TestFindPdf(unittest.TestCase):
+    def test_prefers_paper_pdf(self):
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td)
+            (f / "paper.pdf").write_bytes(b"%PDF-small")
+            (f / "SomeName.pdf").write_bytes(b"%PDF-bigger-than-the-other-one")
+            self.assertEqual(A.find_pdf_in(f).name, "paper.pdf")
+
+    def test_falls_back_to_any_pdf(self):
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td)
+            (f / "SWMManywhere.pdf").write_bytes(b"%PDF-x")
+            self.assertEqual(A.find_pdf_in(f).name, "SWMManywhere.pdf")
+
+    def test_none_when_no_pdf(self):
+        with tempfile.TemporaryDirectory() as td:
+            self.assertIsNone(A.find_pdf_in(Path(td)))
+
+    def test_select_targets_finds_named_pdf(self):
+        import fitz
+        with tempfile.TemporaryDirectory() as td:
+            A.INTEREST = Path(td) / "interest"
+            A.INSIGHTS = Path(td) / "_insights"
+            (A.INTEREST / "SWMManywhere").mkdir(parents=True)
+            A.INSIGHTS.mkdir(parents=True)
+            doc = fitz.open(); doc.new_page().insert_text((72, 72), "x")
+            doc.save(str(A.INTEREST / "SWMManywhere" / "SWMManywhere.pdf")); doc.close()
+            picked = A.select_targets(None)
+            self.assertEqual([p.name for p in picked], ["SWMManywhere.pdf"])
+            self.assertEqual([p.parent.name for p in picked], ["SWMManywhere"])
+
+
 class TestSubjectResolve(unittest.TestCase):
     subjects = [
         {"name": "Hydrology & Hydrologic Modeling", "slug": "hydrology"},

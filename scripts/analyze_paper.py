@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """analyze_paper.py — turn an interesting paper PDF into a grounded research insight.
 
-For each new/changed ``interest/<slug>/paper.pdf`` this script:
+For each new/changed PDF in an ``interest/<slug>/`` folder (any ``*.pdf``; ``paper.pdf``
+is preferred when several are present) this script:
   1. extracts the main text + light metadata (pymupdf),
   2. asks Claude (native PDF document input, guarded; else extracted text) for a
      5-section insight grounded in the author's own publications,
@@ -471,7 +472,7 @@ def render_insight_md(slug: str, structured: dict, meta: dict, figure_path: str 
         "venue": meta.get("venue", ""),
         "link": structured.get("link", ""),
         "figure": figure_path or "",
-        "source_pdf": f"{REPO_BLOB_URL}/interest/{slug}/paper.pdf",
+        "source_pdf": meta.get("source_pdf", ""),
     }
     fm = yaml.safe_dump(front, sort_keys=False, allow_unicode=True, default_flow_style=False)
     body = []
@@ -483,7 +484,7 @@ def render_insight_md(slug: str, structured: dict, meta: dict, figure_path: str 
     return out
 
 
-def write_paper_md(slug: str, meta: dict) -> Path:
+def write_paper_md(folder: Path, meta: dict) -> Path:
     front = {
         "title": meta.get("title", ""),
         "authors": meta.get("authors", ""),
@@ -491,7 +492,7 @@ def write_paper_md(slug: str, meta: dict) -> Path:
         "venue": meta.get("venue", ""),
     }
     fm = yaml.safe_dump(front, sort_keys=False, allow_unicode=True, default_flow_style=False)
-    out = INTEREST / slug / "paper.md"
+    out = folder / "paper.md"  # next to the source PDF (preserves the real folder name)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(f"---\n{fm}---\n\n{meta.get('text','')}", encoding="utf-8")
     return out
@@ -513,17 +514,18 @@ def update_subjects_if_new(structured: dict, subjects: list[dict]) -> bool:
     return True
 
 
-def update_sha_sidecar(slug: str, sha: str) -> Path:
-    out = INTEREST / slug / ".sha256"
+def update_sha_sidecar(folder: Path, sha: str) -> Path:
+    out = folder / ".sha256"
     out.write_text(sha + "\n", encoding="utf-8")
     return out
 
 
-def successful_paths(slug: str, insight_md: Path, figure_path: str | None) -> list[str]:
+def successful_paths(folder: Path, insight_md: Path, figure_path: str | None) -> list[str]:
+    rel = folder.relative_to(REPO).as_posix()
     paths = [
         str(insight_md.relative_to(REPO)),
-        f"interest/{slug}/paper.md",
-        f"interest/{slug}/.sha256",
+        f"{rel}/paper.md",
+        f"{rel}/.sha256",
     ]
     if figure_path:
         paths.append(figure_path.lstrip("/"))
@@ -567,15 +569,31 @@ def _is_zero_sha(sha: str | None) -> bool:
     return not sha or set(sha) == {"0"}
 
 
+def find_pdf_in(folder: Path) -> Path | None:
+    """The PDF to process in a slug folder: prefer `paper.pdf`, else the largest
+    `*.pdf` present. Lets the author drop a paper under its own name (e.g.
+    `interest/SWMManywhere/SWMManywhere.pdf`) without renaming to `paper.pdf`."""
+    preferred = folder / "paper.pdf"
+    if preferred.exists():
+        return preferred
+    pdfs = sorted(folder.glob("*.pdf"), key=lambda p: p.stat().st_size, reverse=True)
+    return pdfs[0] if pdfs else None
+
+
+def _interest_folders() -> list[Path]:
+    return sorted(p for p in INTEREST.iterdir() if p.is_dir()) if INTEREST.exists() else []
+
+
 def _pushed_pdfs(before_sha: str) -> set | None:
-    """Repo-relative interest/**/paper.pdf paths changed in this push, or None if
-    the diff can't be computed (then caller falls back to C3+hash)."""
+    """Repo-relative interest/**/*.pdf paths changed in this push, or None if the
+    diff can't be computed (then caller falls back to C3+hash)."""
     try:
         out = subprocess.run(
             ["git", "diff", "--name-only", before_sha, "HEAD"],
             cwd=REPO, capture_output=True, text=True, check=True,
         ).stdout
-        return {ln.strip() for ln in out.splitlines() if ln.strip().endswith("/paper.pdf")}
+        return {ln.strip() for ln in out.splitlines()
+                if ln.strip().startswith("interest/") and ln.strip().endswith(".pdf")}
     except Exception as e:
         log(f"git diff failed ({e}); using C3+hash only")
         return None
@@ -585,10 +603,13 @@ def select_targets(before_sha: str | None = None) -> list[Path]:
     if not INTEREST.exists():
         return []
     candidates = []
-    for pdf in sorted(INTEREST.glob("*/paper.pdf")):
-        slug = pdf.parent.name
+    for folder in _interest_folders():
+        pdf = find_pdf_in(folder)
+        if pdf is None:
+            continue
+        slug = slugify_from(pdf, None)
         sha = sha256_of(pdf)
-        sidecar = pdf.parent / ".sha256"
+        sidecar = folder / ".sha256"
         prev = sidecar.read_text(encoding="utf-8").strip() if sidecar.exists() else None
         if (not insight_exists_for(slug)) or (prev != sha):
             candidates.append(pdf)
@@ -607,8 +628,11 @@ def select_targets(before_sha: str | None = None) -> list[Path]:
 def process_one(pdf: Path, model: str, dry_run: bool, pubs: list[dict],
                 history: str, known_titles: list[str], subjects: list[dict],
                 placeholder: bool) -> dict | None:
+    folder = pdf.parent
     meta = extract_text(pdf)
     slug = slugify_from(pdf, meta.get("title"))
+    # Source link uses the REAL folder name + actual PDF filename (not the slug).
+    meta["source_pdf"] = f"{REPO_BLOB_URL}/{folder.relative_to(REPO).as_posix()}/{pdf.name}"
 
     messages = build_messages(meta, meta["text"], pdf, history, subjects)
     structured = call_claude(messages, model, dry_run)
@@ -625,9 +649,9 @@ def process_one(pdf: Path, model: str, dry_run: bool, pubs: list[dict],
     # Success path only (A5): now write figure + paper.md + insight + sidecar.
     figure_path = extract_figure(pdf, slug)
     insight_md = render_insight_md(slug, structured, meta, figure_path)
-    write_paper_md(slug, meta)
+    write_paper_md(folder, meta)
     update_subjects_if_new(structured, subjects)
-    update_sha_sidecar(slug, sha256_of(pdf))
+    update_sha_sidecar(folder, sha256_of(pdf))
 
     return {
         "slug": slug,
@@ -635,7 +659,7 @@ def process_one(pdf: Path, model: str, dry_run: bool, pubs: list[dict],
         "subject": structured["subject"],
         "date": now_utc_date(),
         "figure": figure_path or "",
-        "paths": successful_paths(slug, insight_md, figure_path),
+        "paths": successful_paths(folder, insight_md, figure_path),
     }
 
 
@@ -670,8 +694,8 @@ def emit_github_output(events: list[dict]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("paths", nargs="*", help="specific interest/<slug>/paper.pdf paths")
-    ap.add_argument("--all", action="store_true", help="process every interest/*/paper.pdf")
+    ap.add_argument("paths", nargs="*", help="specific PDF paths under interest/<slug>/")
+    ap.add_argument("--all", action="store_true", help="process every interest/<slug>/ folder's PDF")
     ap.add_argument("--dry-run", action="store_true", help="canned response, zero API spend")
     ap.add_argument("--local", action="store_true", help="real API call from a dev machine")
     ap.add_argument("--model", default=DEFAULT_MODEL, help="model id")
@@ -680,7 +704,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.paths:
         targets = [Path(p).resolve() for p in args.paths]
     elif args.all:
-        targets = sorted(INTEREST.glob("*/paper.pdf"))
+        targets = [pdf for folder in _interest_folders() if (pdf := find_pdf_in(folder))]
     else:
         targets = select_targets(os.environ.get("BEFORE_SHA"))
 
