@@ -50,9 +50,19 @@ a:hover { text-decoration: underline; }
   max-width: 60ch;
 }
 
+.byline {
+  margin: 18px 0 4px;
+  font-size: 0.98rem;
+  color: var(--text);
+  max-width: 70ch;
+}
+.byline strong { font-weight: 600; }
+.byline a { white-space: nowrap; }
+.byline .sep { color: var(--muted); margin: 0 8px; }
+
 .intro {
   color: var(--muted);
-  margin: 18px 0 26px;
+  margin: 6px 0 26px;
   max-width: 66ch;
 }
 
