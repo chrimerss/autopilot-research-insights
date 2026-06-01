@@ -210,6 +210,46 @@ class TestPublishedTitleGrounding(unittest.TestCase):
         self.assertEqual(A._front_matter_title(body), "A Unique Published Paper Title")
 
 
+class TestMakeClient(unittest.TestCase):
+    def setUp(self):
+        import os
+        self._saved = {k: os.environ.get(k) for k in
+                       ("INSIGHTS_PROVIDER", "AWS_REGION", "AWS_DEFAULT_REGION", "ANTHROPIC_API_KEY")}
+        for k in self._saved:
+            os.environ.pop(k, None)
+
+    def tearDown(self):
+        import os
+        for k, v in self._saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+    def test_bedrock_provider(self):
+        import os
+        from anthropic import AnthropicBedrock
+        os.environ["INSIGHTS_PROVIDER"] = "bedrock"
+        os.environ["AWS_REGION"] = "us-east-1"
+        self.assertIsInstance(A.make_client(), AnthropicBedrock)  # no network call on construct
+
+    def test_bedrock_without_region_raises(self):
+        import os
+        os.environ["INSIGHTS_PROVIDER"] = "bedrock"
+        with self.assertRaises(SystemExit):
+            A.make_client()
+
+    def test_anthropic_provider(self):
+        import os
+        import anthropic
+        os.environ["ANTHROPIC_API_KEY"] = "sk-ant-dummy"
+        self.assertIsInstance(A.make_client(), anthropic.Anthropic)
+
+    def test_anthropic_without_key_raises(self):
+        with self.assertRaises(SystemExit):
+            A.make_client()
+
+
 class TestValidate(unittest.TestCase):
     def test_missing_key_raises(self):
         with self.assertRaises(ValueError):

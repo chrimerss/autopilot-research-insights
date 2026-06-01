@@ -10,6 +10,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write # required to assume the AWS IAM role via OIDC (Bedrock provider)
 
 # Queue, do NOT cancel: cancelling a run mid-flight while another push arrives could
 # silently drop an insight (the cancelled run owned that push's diff). Serialize instead.
@@ -34,14 +35,26 @@ jobs:
       - name: Install dependencies
         run: pip install -r scripts/requirements.txt
 
+      # Only runs for the Bedrock provider: assumes the IAM role via GitHub OIDC
+      # (no long-lived AWS keys). Set the AWS_ROLE_ARN + AWS_REGION repo variables.
+      - name: Configure AWS credentials (Bedrock)
+        if: ${{ vars.INSIGHTS_PROVIDER == 'bedrock' }}
+        uses: aws-actions/configure-aws-credentials@99214aa6889fcddfa57764031d71add364327e59 # v6.1.3
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
       - name: Analyze new papers
         id: run
         run: python scripts/analyze_paper.py
         env:
-          # Secret is provided ONLY through env (never echoed; masked by Actions).
+          # Provider: 'bedrock' (AWS) or 'anthropic' (direct API). Default: anthropic.
+          INSIGHTS_PROVIDER: ${{ vars.INSIGHTS_PROVIDER || 'anthropic' }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          # Direct-API key (unused when provider=bedrock). Secret only via env; masked.
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Default model; override by setting the INSIGHTS_MODEL repo variable
-          # (Opus override value = claude-opus-4-8).
+          # Model id. Bedrock needs a Bedrock model/inference-profile id (set the
+          # INSIGHTS_MODEL repo variable); direct API defaults to Sonnet.
           INSIGHTS_MODEL: ${{ vars.INSIGHTS_MODEL || 'claude-sonnet-4-6' }}
           BEFORE_SHA: ${{ github.event.before }}
 

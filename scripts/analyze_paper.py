@@ -373,18 +373,33 @@ def parse_fenced_json(raw: str) -> dict:
     return json.loads(candidate)
 
 
+def make_client():
+    """Provider-flexible client. INSIGHTS_PROVIDER=bedrock → AWS Bedrock (credentials via
+    the standard AWS chain / GitHub OIDC; set AWS_REGION and a Bedrock model id in
+    INSIGHTS_MODEL). Otherwise the direct Anthropic API with ANTHROPIC_API_KEY."""
+    provider = (os.environ.get("INSIGHTS_PROVIDER") or "anthropic").lower()
+    if provider == "bedrock":
+        from anthropic import AnthropicBedrock
+
+        region = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")
+        if not region:
+            raise SystemExit("INSIGHTS_PROVIDER=bedrock but AWS_REGION is not set.")
+        return AnthropicBedrock(aws_region=region)
+
+    import anthropic
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise SystemExit("ANTHROPIC_API_KEY is not set; aborting (no partial writes).")
+    return anthropic.Anthropic(api_key=api_key)
+
+
 def call_claude(messages: list[dict], model: str, dry_run: bool) -> dict:
     if dry_run:
         fixture = json.loads((FIXTURES / "sample_insight.json").read_text(encoding="utf-8"))
         return fixture
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise SystemExit("ANTHROPIC_API_KEY is not set; aborting (no partial writes).")
-
-    import anthropic
-
-    client = anthropic.Anthropic(api_key=api_key)
+    client = make_client()
     attempt_msgs = list(messages)
     last_err = None
     for attempt in range(2):  # one call + at most one retry-nudge

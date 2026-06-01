@@ -62,6 +62,74 @@ the **full** model id:
 gh variable set INSIGHTS_MODEL --repo chrimerss/autopilot-research-insights --body claude-opus-4-8
 ```
 
+### Using AWS Bedrock instead of the Anthropic API
+
+The analyzer is provider-flexible. To run Claude via **AWS Bedrock** with **GitHub OIDC**
+(no long-lived AWS keys in the repo):
+
+1. **Enable model access** in the AWS Console → Bedrock → *Model access* for the Claude model
+   you want, in your region.
+
+2. **One-time: an IAM OIDC provider for GitHub** (skip if your account already has one):
+   ```bash
+   aws iam create-open-id-connect-provider \
+     --url https://token.actions.githubusercontent.com \
+     --client-id-list sts.amazonaws.com \
+     --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1
+   ```
+
+3. **An IAM role the Action can assume.** Save `trust.json` (replace `<ACCOUNT_ID>`):
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [{
+       "Effect": "Allow",
+       "Principal": { "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com" },
+       "Action": "sts:AssumeRoleWithWebIdentity",
+       "Condition": {
+         "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
+         "StringLike": { "token.actions.githubusercontent.com:sub": "repo:chrimerss/autopilot-research-insights:*" }
+       }
+     }]
+   }
+   ```
+   and `bedrock.json` (replace `<REGION>` and `<ACCOUNT_ID>`):
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [{
+       "Effect": "Allow",
+       "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+       "Resource": [
+         "arn:aws:bedrock:<REGION>::foundation-model/anthropic.claude-*",
+         "arn:aws:bedrock:*:<ACCOUNT_ID>:inference-profile/*"
+       ]
+     }]
+   }
+   ```
+   then:
+   ```bash
+   aws iam create-role --role-name research-insights-bedrock \
+     --assume-role-policy-document file://trust.json
+   aws iam put-role-policy --role-name research-insights-bedrock \
+     --policy-name bedrock-invoke --policy-document file://bedrock.json
+   ```
+
+4. **Point the repo at Bedrock** (no `ANTHROPIC_API_KEY` needed):
+   ```bash
+   R=chrimerss/autopilot-research-insights
+   gh variable set INSIGHTS_PROVIDER --repo $R --body bedrock
+   gh variable set AWS_REGION        --repo $R --body <REGION>
+   gh variable set AWS_ROLE_ARN      --repo $R --body arn:aws:iam::<ACCOUNT_ID>:role/research-insights-bedrock
+   # Bedrock model/inference-profile id — e.g. an Opus 4.x profile in your region:
+   gh variable set INSIGHTS_MODEL    --repo $R --body us.anthropic.claude-opus-4-1-20250805-v1:0
+   ```
+
+The workflow assumes the role via OIDC and the script uses `AnthropicBedrock`. `INSIGHTS_MODEL`
+**must** be a Bedrock model/inference-profile id (the `us.anthropic.claude-...-v1:0` form), not the
+direct-API name. To switch back to the direct API, set `INSIGHTS_PROVIDER=anthropic` and add the
+`ANTHROPIC_API_KEY` secret.
+
 ### Adding research history (optional, improves synthesis)
 
 `_data/publications.yml` is already seeded with your 20 most-recent Scholar papers, which is
