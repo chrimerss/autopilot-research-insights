@@ -23,5 +23,10 @@ __pycache__/
 # Local Claude Code / editor state
 .claude/
 
+# Published-paper PDFs: used locally to build _data/publications.yml, but NOT
+# committed — they're ~500MB of publisher final PDFs (repo bloat + copyright).
+# Add main-text as published/<slug>.md instead for richer insight grounding.
+published/*.pdf
+
 # macOS
 .DS_Store
