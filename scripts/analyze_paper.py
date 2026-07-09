@@ -4,7 +4,7 @@
 For each new/changed PDF in an ``interest/<slug>/`` folder (any ``*.pdf``; ``paper.pdf``
 is preferred when several are present) this script:
   1. extracts the main text + light metadata (pymupdf),
-  2. asks Claude (native PDF document input, guarded; else extracted text) for a
+  2. asks Claude (extracted text only) for a
      5-section insight grounded in the author's own publications,
   3. on success writes ``interest/<slug>/paper.md`` (extracted text),
      a representative figure under ``assets/figures/<slug>/`` (best-effort),
@@ -71,12 +71,9 @@ FIG_ASPECT_HI = 5.0
 FIG_PAGE_WINDOW = 8        # only look at the first N pages
 FIG_RENDER_DPI = 150       # B1 page-render fallback DPI
 
-# Claude / PDF guards (Fork A + E).
+# Claude request limits (Fork A + E).
 MAX_TOKENS = 4000
-DOC_PAGE_LIMIT = 90                 # Anthropic native-PDF hard limit is ~100 pages
-DOC_SIZE_LIMIT = 28 * 1024 * 1024   # ~32MB hard limit, with headroom
-TOKENS_PER_PAGE_EST = 3000          # rough doc-token estimate per PDF page
-CONTEXT_LIMIT = 180_000             # conservative usable context budget
+PAPER_TEXT_CHAR_LIMIT = 120_000     # ~30k tokens of extracted paper text
 
 
 def log(msg: str) -> None:
@@ -333,29 +330,14 @@ def build_user_prompt(meta: dict, history: str, subjects: list[dict]) -> str:
     )
 
 
-def build_messages(meta: dict, paper_text: str, pdf_path: Path, history: str, subjects: list[dict]) -> list[dict]:
-    """Native PDF document block when within both guards; else extracted text."""
+def build_messages(meta: dict, paper_text: str, history: str, subjects: list[dict]) -> list[dict]:
+    """Extracted text only — native PDF blocks are base64-inflated ~33% and can
+    exceed Bedrock's 25 MB request cap even when within Anthropic's own limits."""
     user_prompt = build_user_prompt(meta, history, subjects)
-    content: list[dict] = []
-
-    pages = meta.get("page_count", 0)
-    size = meta.get("size", 0)
-    est = pages * TOKENS_PER_PAGE_EST + len(history) // 4 + MAX_TOKENS
-    within_hard = pages <= DOC_PAGE_LIMIT and size <= DOC_SIZE_LIMIT
-    within_budget = est < CONTEXT_LIMIT
-
-    if within_hard and within_budget:
-        import base64
-        b64 = base64.standard_b64encode(pdf_path.read_bytes()).decode("ascii")
-        content.append({
-            "type": "document",
-            "source": {"type": "base64", "media_type": "application/pdf", "data": b64},
-        })
-    else:
-        log(f"PDF too large for native input (pages={pages}, size={size}, est_tokens={est}); sending text.")
-        content.append({"type": "text", "text": f"PAPER TEXT (extracted):\n{paper_text[:120000]}"})
-
-    content.append({"type": "text", "text": user_prompt})
+    content = [
+        {"type": "text", "text": f"PAPER TEXT (extracted):\n{paper_text[:PAPER_TEXT_CHAR_LIMIT]}"},
+        {"type": "text", "text": user_prompt},
+    ]
     return [{"role": "user", "content": content}]
 
 
@@ -634,7 +616,7 @@ def process_one(pdf: Path, model: str, dry_run: bool, pubs: list[dict],
     # Source link uses the REAL folder name + actual PDF filename (not the slug).
     meta["source_pdf"] = f"{REPO_BLOB_URL}/{folder.relative_to(REPO).as_posix()}/{pdf.name}"
 
-    messages = build_messages(meta, meta["text"], pdf, history, subjects)
+    messages = build_messages(meta, meta["text"], history, subjects)
     structured = call_claude(messages, model, dry_run)
     validate(structured)
     structured = subject_resolve(structured, subjects)
