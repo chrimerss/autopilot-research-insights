@@ -146,6 +146,24 @@ class TestSelectTargetsAndSentinel(unittest.TestCase):
             doc = fitz.open(); doc.new_page().insert_text((72, 72), "changed content"); doc.save(str(slug_dir / "paper.pdf")); doc.close()
             self.assertEqual([p.parent.name for p in A.select_targets(None)], ["demo"])
 
+    def test_pushed_pdfs_non_ascii_name(self):
+        import subprocess
+        name = "interest/swot/GRL - SWOT‐Fitted Bathymetry.pdf"
+        with tempfile.TemporaryDirectory() as td:
+            git = lambda *a: subprocess.run(["git", "-C", td, *a], check=True, capture_output=True, text=True).stdout
+            git("init", "-q")
+            git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "base")
+            before = git("rev-parse", "HEAD").strip()
+            (Path(td) / "interest" / "swot").mkdir(parents=True)
+            (Path(td) / name).write_bytes(b"%PDF-x")
+            git("add", "-A")
+            git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "add")
+            old_repo, A.REPO = A.REPO, Path(td)
+            try:
+                self.assertEqual(A._pushed_pdfs(before), {name})
+            finally:
+                A.REPO = old_repo
+
 
 class TestFindPdf(unittest.TestCase):
     def test_prefers_paper_pdf(self):

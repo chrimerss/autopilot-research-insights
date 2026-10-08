@@ -570,12 +570,14 @@ def _pushed_pdfs(before_sha: str) -> set | None:
     """Repo-relative interest/**/*.pdf paths changed in this push, or None if the
     diff can't be computed (then caller falls back to C3+hash)."""
     try:
+        # -z: raw NUL-separated paths. Without it git quotes/octal-escapes non-ASCII
+        # names (e.g. a U+2010 hyphen), so they never match "interest/".
         out = subprocess.run(
-            ["git", "diff", "--name-only", before_sha, "HEAD"],
+            ["git", "diff", "-z", "--name-only", before_sha, "HEAD"],
             cwd=REPO, capture_output=True, text=True, check=True,
         ).stdout
-        return {ln.strip() for ln in out.splitlines()
-                if ln.strip().startswith("interest/") and ln.strip().endswith(".pdf")}
+        return {p for p in out.split("\0")
+                if p.startswith("interest/") and p.endswith(".pdf")}
     except Exception as e:
         log(f"git diff failed ({e}); using C3+hash only")
         return None
