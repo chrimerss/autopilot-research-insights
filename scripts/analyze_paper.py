@@ -45,7 +45,7 @@ PUBLISHED = REPO / "published"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 PROJECT_HTML = REPO / "project.html"
 
-DEFAULT_MODEL = os.environ.get("INSIGHTS_MODEL") or "claude-sonnet-4-6"
+DEFAULT_MODEL = os.environ.get("INSIGHTS_MODEL") or "claude-sonnet-5-5"
 
 # Source-PDF links point at the committed PDF on GitHub, because interest/ is excluded
 # from the built site (a same-origin /interest/... link would 404). Override via env.
@@ -72,7 +72,7 @@ FIG_PAGE_WINDOW = 8        # only look at the first N pages
 FIG_RENDER_DPI = 150       # B1 page-render fallback DPI
 
 # Claude request limits (Fork A + E).
-MAX_TOKENS = 4000
+MAX_TOKENS = 16000   # Sonnet 5.5 thinks by default; thinking tokens count against this
 PAPER_TEXT_CHAR_LIMIT = 120_000     # ~30k tokens of extracted paper text
 
 

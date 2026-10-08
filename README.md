@@ -60,7 +60,7 @@ gh api -X POST repos/chrimerss/autopilot-research-insights/pages \
 
 ### Model (optional)
 
-The analyzer uses `claude-sonnet-4-6` by default. To use Opus instead, set the repo variable to
+The analyzer uses `claude-sonnet-5-5` by default. To use Opus instead, set the repo variable to
 the **full** model id:
 
 ```bash

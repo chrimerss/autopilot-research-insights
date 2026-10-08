@@ -58,7 +58,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           # Model id. Bedrock needs a Bedrock model/inference-profile id (set the
           # INSIGHTS_MODEL repo variable); direct API defaults to Sonnet.
-          INSIGHTS_MODEL: ${{ vars.INSIGHTS_MODEL || 'claude-sonnet-4-6' }}
+          INSIGHTS_MODEL: ${{ vars.INSIGHTS_MODEL || 'claude-sonnet-5-5' }}
           BEFORE_SHA: ${{ github.event.before }}
 
       - name: Commit insights to main
