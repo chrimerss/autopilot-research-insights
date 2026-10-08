@@ -66,6 +66,22 @@ class TestLiquidNeutralize(unittest.TestCase):
         self.assertNotIn("{", out)
         self.assertIn("&#123;", out)
 
+    def test_sanitize_md_math_and_pipes(self):
+        out = A.sanitize_md("median |WSE bias| and $$\\lvert b_{\\text{par}} \\rvert < |z|$$ {{ x }}")
+        prose, math = out.split("$$")[0], out.split("$$")[1]
+        self.assertEqual(prose, "median \\|WSE bias\\| and ")
+        self.assertEqual(math, "\\lvert b_{\\text{par}} \\rvert < \\vert z\\vert ")
+        self.assertNotIn("{{", out)
+        self.assertIn("&#123;", out)
+
+    def test_sanitize_md_math_braces_and_json_escapes(self):
+        # "\t"/"\f" left unescaped in JSON arrive as TAB/form-feed; restored inside math.
+        out = A.sanitize_md("$$\frac{{a}}{b} + \text{x}$$")
+        self.assertEqual(out, "$$\\frac{ {a}}{b} + \\text{x}$$")
+
+    def test_sanitize_md_code_span_keeps_braces_and_pipes(self):
+        self.assertEqual(A.sanitize_md("see `W[{{i}}] | x` now"), "see `W[{ {i}}] | x` now")
+
 
 class TestRenderYamlSafe(unittest.TestCase):
     def test_nasty_title_roundtrips(self):

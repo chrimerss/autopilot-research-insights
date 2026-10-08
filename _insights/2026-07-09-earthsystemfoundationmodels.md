@@ -28,7 +28,7 @@ This dataset directly intersects my agenda on **foundation models and coupled hu
 2. **Uncertainty is discarded.** SoilGrids quantiles, GRACE measurement-error and scale-factor fields are dropped; only central estimates survive. This is dangerous for downstream ML that should propagate uncertainty, and contradicts best practice from triple-collocation work.
 3. **Spurious cross-domain correlations.** The authors themselves warn co-locating point-rasterised data (power plants, conflict) with dense reanalysis on a common grid can induce artificial correlations — a real risk for naive foundation-model training.
 4. **0.25° (~28 km) is too coarse** for the flood/urban/exposure use cases the paper advertises; 30 m settlement layers are averaged into meaninglessness.
-5. **Validation is shallow.** Only 54 of 757 variable families were bounds-checked; only 3/5 historical events were detected at |z|>1. No held-out downstream task on a real foundation model — the RCF/ICA probes are proxies, not proof of foundation-model value.
+5. **Validation is shallow.** Only 54 of 757 variable families were bounds-checked; only 3/5 historical events were detected at $$\lvert z \rvert > 1$$. No held-out downstream task on a real foundation model — the RCF/ICA probes are proxies, not proof of foundation-model value.
 6. **License exclusions fragment coverage** (EDGAR fossil CO2 excluded), and temporal coverage is wildly heterogeneous (ocean starts 2010, land use 1900), complicating multi-domain tensor construction.
 
 ## Gaps & Ideas

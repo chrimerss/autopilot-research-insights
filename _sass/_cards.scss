@@ -70,6 +70,7 @@
 .insight-sections h2:first-child { margin-top: 4px; }
 .insight-sections p { margin: 8px 0; }
 .insight-sections ul, .insight-sections ol { margin: 8px 0; padding-left: 22px; }
+.insight-sections mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; }
 .insight-sections code {
   background: var(--surface-2);
   padding: 1px 5px;

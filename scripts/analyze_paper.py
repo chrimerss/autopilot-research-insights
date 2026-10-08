@@ -325,6 +325,11 @@ def build_user_prompt(meta: dict, history: str, subjects: list[dict]) -> str:
         "Write a research insight with these five parts, mapped 1:1 to the JSON keys, in order: "
         "Summary & Key Contributions -> Connections to My Work -> Critique & Limitations -> "
         "Gaps & Ideas -> How to Advance/Disrupt the Field (recommended data + methods).\n\n"
+        "Formatting: write every math symbol, variable and equation in LaTeX wrapped in DOUBLE "
+        "dollars, e.g. $$b_{\\text{par}}$$, $$\\Delta H$$, $$\\lvert z \\rvert > 1$$ inline, or a "
+        "$$...$$ block on its own line for display equations. Never use single $ for math, and "
+        "never use the | character anywhere (write absolute values as \\lvert x \\rvert). "
+        "Escape every backslash in the JSON strings (\\\\text, \\\\Delta).\n\n"
         "Respond with ONLY this fenced JSON object:\n"
         "```json\n" + json.dumps(schema, indent=2) + "\n```"
     )
@@ -442,6 +447,28 @@ def liquid_neutralize(s: str) -> str:
     return (s or "").replace("{", "&#123;")
 
 
+RAW_SPAN = re.compile(r"(\$\$.+?\$\$|`[^`\n]+`)", re.S)
+
+
+def sanitize_md(s: str) -> str:
+    """Make LLM markdown safe for Jekyll/kramdown. kramdown turns ANY line containing a
+    pipe into a table (even inside math), so pipes are escaped in prose and become
+    \\vert / \\Vert in $$...$$ math. Prose is Liquid-neutralized; math and code spans keep
+    their braces (an entity would show literally there) but `{{` / `{%` are split so no
+    Liquid tag can form."""
+    parts = RAW_SPAN.split(s or "")
+    for i, part in enumerate(parts):
+        if i % 2:  # $$...$$ math or `code` span
+            if part.startswith("$$"):
+                # Unescaped \b \f \t \r in the JSON (\beta, \frac, \text, \rvert) -> restore.
+                part = part.translate({8: r"\b", 9: r"\t", 12: r"\f", 13: r"\r"})
+                part = part.replace(r"\|", r"\Vert ").replace("|", r"\vert ")
+            parts[i] = re.sub(r"\{(?=[{%])", "{ ", part)
+        else:
+            parts[i] = re.sub(r"(?<!\\)\|", r"\\|", liquid_neutralize(part))
+    return "".join(parts)
+
+
 def render_insight_md(slug: str, structured: dict, meta: dict, figure_path: str | None) -> Path:
     front = {
         "subject": structured["subject"],
@@ -459,7 +486,7 @@ def render_insight_md(slug: str, structured: dict, meta: dict, figure_path: str 
     fm = yaml.safe_dump(front, sort_keys=False, allow_unicode=True, default_flow_style=False)
     body = []
     for key, heading in SECTION_ORDER:
-        body.append(f"## {heading}\n\n{liquid_neutralize(str(structured.get(key, '')).strip())}\n")
+        body.append(f"## {heading}\n\n{sanitize_md(str(structured.get(key, '')).strip())}\n")
     INSIGHTS.mkdir(parents=True, exist_ok=True)
     out = INSIGHTS / f"{front['date']}-{slug}.md"
     out.write_text(f"---\n{fm}---\n\n" + "\n".join(body), encoding="utf-8")
